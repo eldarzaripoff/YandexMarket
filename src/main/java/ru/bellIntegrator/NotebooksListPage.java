@@ -122,13 +122,13 @@ public class NotebooksListPage {
                         new WebDriverWait(chromeDriver, 3000).until(ExpectedConditions.jsReturnsValue("return document.readyState==\"complete\";"));
                     } else {
                         System.out.println("Кнопка 'forwardButton' равна NULL в listFromOnePage()");
-                        System.out.println("ЯКОРЯ для списка НЕ ОБНАРУЖЕНО!!!");
+                        System.out.println("КНОПКИ ВНИЗ для списка НЕ ОБНАРУЖЕНО!!!");
                         System.out.println("ДОСРОЧНО ЗАВЕРШАЮ ЦИКЛ!");
                         break; // Выход из цикла
                     }
                 } else {
                     System.out.println("Кнопка 'forwardButton' не найдена. Размер forwardButtons.size() равен 0.");
-                    System.out.println("ЯКОРЯ для списка НЕ ОБНАРУЖЕНО!!!");
+                    System.out.println("КНОПКИ ВНИЗ НЕ ОБНАРУЖЕНО!!!");
                     System.out.println("ДОСРОЧНО ЗАВЕРШАЮ ЦИКЛ!");
                     break; // Выход из цикла
                 }

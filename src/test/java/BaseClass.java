@@ -5,7 +5,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import java.util.concurrent.TimeUnit;
 
 public class BaseClass {
-    protected ChromeDriver chromeDriver;
+    protected static ChromeDriver chromeDriver;
 
     @BeforeEach
     public void before() {

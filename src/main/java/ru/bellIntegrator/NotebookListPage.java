@@ -13,11 +13,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class NotebookCollector {
+public class NotebookListPage {
     /**
      * Инстанс для синглтона
      */
-    private static NotebookCollector instance;
+    private static NotebookListPage instance;
 
     /**
      * Хромдрайвер
@@ -59,7 +59,7 @@ public class NotebookCollector {
     List<WebElement> forwardButtons;
     Map<String, String> onePageCatalog = new HashMap<>();
 
-    private NotebookCollector(ChromeDriver chromeDriver) {
+    private NotebookListPage(ChromeDriver chromeDriver) {
         this.lowPriceField = chromeDriver.findElement(By.xpath("//div[@data-auto='filter-range-glprice']/descendant::span[@data-auto='filter-range-min']/descendant::input[@type='text']"));
         this.highPriceField = chromeDriver.findElement(By.xpath("//div[@data-auto='filter-range-glprice']/descendant::span[@data-auto='filter-range-max']/descendant::input[@type='text']"));
         this.lenovoButton = chromeDriver.findElement(By.xpath("//label[@data-auto='filter-list-item-152981']/descendant::span[@class='_1Mp5C']"));
@@ -74,9 +74,9 @@ public class NotebookCollector {
      * Этот метод выполняет создание объекта NotebookCollector.
      * @return объект NotebookCollector
      */
-    public static synchronized NotebookCollector getInstance(ChromeDriver chromeDriver) {
+    public static synchronized NotebookListPage getInstance(ChromeDriver chromeDriver) {
         if (instance == null) {
-            instance = new NotebookCollector(chromeDriver);
+            instance = new NotebookListPage(chromeDriver);
         }
         return instance;
     }
@@ -102,7 +102,7 @@ public class NotebookCollector {
     /**
      * Этот метод выполняет собирает список ноутбуков с одной страницы Яндекс Маркета.
      */
-    public void fillNotebookList() {
+    public Map<String, Integer> fillNotebookList() {
         forwardButtons = getForwardButtons();
 
         if(forwardButtons.isEmpty()) {
@@ -127,49 +127,72 @@ public class NotebookCollector {
                 }
                 listOfNotebooks.addAll(currentElements);
                 // Прокрутка к последнему элементу
-                WebElement lastElement = listOfNotebooks.get(listOfNotebooks.size() - 1);
+                WebElement lastElement = listOfNotebooks.get(getListSize() - 1);
                 actions.moveToElement(lastElement).perform();
 
                 // Обновление размера списка
-                currentSize = listOfNotebooks.size();
+                currentSize = getListSize();
                 count++;
                 if (count == 5) {
                     System.out.println("Прошло 5 попыток, но страница не наполнилась до 24");
                     break;
                 }
-            } while (currentSize > previousSize && listOfNotebooks.size() < 24);
+            } while (currentSize > previousSize && getListSize() < 24);
         } else {
             actions.moveToElement(forwardButtons.get(0)).perform();
+            boolean isListOfNotebooksStale = ExpectedConditions.stalenessOf(chromeDriver.findElement(By.xpath("//div[@data-known-size='249']"))).apply(chromeDriver);
+            if (isListOfNotebooksStale) {
+                chromeDriver.findElements(By.xpath("//div[@data-known-size='249']"));
+            }
             //wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.xpath("//div[@data-known-size='249']")));
-            while (listOfNotebooks.size() < 24) {
+            if (isListOfNotebooksStale) {
+                chromeDriver.findElements(By.xpath("//div[@data-known-size='249']"));
+            }
+            while (getListSize() < 24) {
                 listOfNotebooks = chromeDriver.findElements(By.xpath("//div[@data-known-size='249']"));
             }
         }
-        //System.out.println("ListOfNotebooks.size is: " + getListSize());
-
 
         for (int i = 0; i < getListSize(); ++i) {
-            //wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@data-known-size='249'][" + (i+1) + "]//h3[@data-auto='snippet-title-header']//span")));
-//            try {
-//                wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@data-known-size='249'][" + (i+1) + "]//h3[@data-auto='snippet-price-current']")));
-//            } catch (TimeoutException e) {
-//                e.printStackTrace();
-//                listOfNotebooks = chromeDriver.findElements(By.xpath("//div[@data-known-size='249']"));
-//                wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@data-known-size='249'][" + (i+1) + "]//h3[@data-auto='snippet-price-current']")));
-//            }
-            //listOfNotebooks = chromeDriver.findElements(By.xpath("//div[@data-known-size='249']"));
-            actions.moveToElement(chromeDriver.findElement(By.xpath("//div[@data-known-size='249'][" + (i+1) + "]")));
+            boolean isTitleStale = ExpectedConditions.stalenessOf(chromeDriver.findElement(By.xpath("//div[@data-known-size='249'][" + (i+1) + "]//h3[@data-auto='snippet-title-header']//span"))).apply(chromeDriver);
+            boolean isPriceStale = ExpectedConditions.stalenessOf(chromeDriver.findElement(By.xpath("//div[@data-known-size='249'][" + (i+1) + "]//h3[@data-auto='snippet-title-header']//span"))).apply(chromeDriver);
+            if (isPriceStale) {
+                chromeDriver.findElement(By.xpath("//div[@data-known-size='249'][" + (i+1) + "]//h3[@data-auto='snippet-title-header']//span"));
+            }
+            //wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@data-known-size='249'][" + (i+1) + "]//h3[@data-auto='snippet-price-current']")));
+            if (isPriceStale) {
+                chromeDriver.findElement(By.xpath("//div[@data-known-size='249'][" + (i+1) + "]//h3[@data-auto='snippet-title-header']//span"));
+            }
+            if (isTitleStale) {
+                chromeDriver.findElement(By.xpath("//div[@data-known-size='249'][" + (i+1) + "]//h3[@data-auto='snippet-title-header']//span"));
+            }
+            chromeDriver.findElement(By.xpath("//div[@data-known-size='249'][" + (i+1) + "]//h3[@data-auto='snippet-title-header']//span"));
+            chromeDriver.findElement(By.xpath("//div[@data-known-size='249'][" + (i+1) + "]//h3[@data-auto='snippet-title-header']//span"));
+
             onePageCatalog.put(
                   listOfNotebooks.get(i).findElement(By.xpath("//div[@data-known-size='249'][" + (i+1) + "]//h3[@data-auto='snippet-title-header']//span")).getText(),
                     listOfNotebooks.get(i).findElement(By.xpath("//div[@data-known-size='249'][" + (i+1) + "]//h3[@data-auto='snippet-price-current']")).getText()
             );
-            //System.out.println("Counter i is: " + i);
+        }
+        Map<String, Integer> finishCatalog = mapConverter(onePageCatalog);
+        return finishCatalog;
+    }
+
+    public Map<String, Integer> mapConverter(Map<String, String> map) {
+        Map <String, Integer> integerMap = new HashMap<>();
+
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            String cleanedValue = entry.getValue().replaceAll("[^0-9]", ""); // убираем все символы кроме цифр
+            int integerValue = Integer.parseInt(cleanedValue); // преобразуем очищенное значение в Integer
+            integerMap.put(entry.getKey(), integerValue);
         }
 
-        // Вывод результата
-        System.out.println("Размер мапы: " + onePageCatalog.size());
-
-
+        System.out.println("HashMap со значениями Integer:");
+        for (Map.Entry<String, Integer> integerEntry : integerMap.entrySet()) {
+            System.out.println(integerEntry.getKey() + " = " + integerEntry.getValue());
+        }
+        System.out.println("Размер HashMap: " + integerMap.size());
+        return integerMap;
     }
 
     public List<WebElement> getForwardButtons() {
@@ -185,14 +208,21 @@ public class NotebookCollector {
             if (forwardButtons.size() > 0) {
                 break;
             }
-            if (i == 4 && forwardButtons.size() == 0) {
+            if (i == 4) {
                 System.out.println("Использовали все попытки но кнопку Вперёд не нашли");
             }
         }
         System.out.println("Размер списка с кнопкой Вперёд: " + forwardButtons.size());
         return forwardButtons;
     }
-
+    public List<Map<String,Integer>> allTheCatalog() {
+        List<Map<String, Integer>> listOfMaps = new ArrayList<>();
+        do {
+            listOfMaps.add(fillNotebookList());
+            chromeDriver.findElement(By.xpath("//span[@class='_3e9Bd']")).click();
+        } while (!getForwardButtons().isEmpty());
+        return listOfMaps;
+    }
 
 
 

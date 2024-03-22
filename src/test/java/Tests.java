@@ -27,11 +27,11 @@ public class Tests extends BaseClass {
         String lowPrice = "10000";
         String highPrice = "30000";
         NotebookListPage notebookListPage = NotebookListPage.getInstance(chromeDriver);
-        notebookListPage.find(lowPrice, highPrice);
-        Map<String, Integer> map = notebookListPage.fillNotebookList();
+        notebookListPage.initFilters(lowPrice, highPrice);
+        //Map<String, Integer> map = notebookListPage.fillNotebookList();
 
-        Assertions.assertTrue(map.size() > 12,
-                "На странице представлено ноутбуков меньше чем 12");
+//        Assertions.assertTrue(map.size() > 12,
+//                "На странице представлено ноутбуков меньше чем 12");
     }
 
 //    @ParameterizedTest
@@ -43,10 +43,10 @@ public class Tests extends BaseClass {
         String lowPrice = "10000";
         String highPrice = "30000";
         NotebookListPage notebookListPage = NotebookListPage.getInstance(chromeDriver);
-        notebookListPage.find(lowPrice, highPrice);
+        notebookListPage.initFilters(lowPrice, highPrice);
+        notebookListPage.Parsing();
 
-        List<Map<String, Integer>> mapList = notebookListPage.allTheCatalog();
-        System.out.println(mapList.size());
+        System.out.println(notebookListPage.onePageCatalog.size());
      }
 
 

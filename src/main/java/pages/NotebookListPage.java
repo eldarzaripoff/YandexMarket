@@ -118,9 +118,10 @@ public class NotebookListPage {
         actions.moveToElement(getRecommendation()).perform();
         for (int i = 0; i < getItems().size(); ++i) {
 
-            String name = waitForElementToBeRefreshedAndClickable(chromeDriver, By.xpath("(//h3[@data-auto='snippet-title'])[" + (i + 1) + "]")).getText();
-            String strprice = waitForElementToBeRefreshedAndClickable(chromeDriver, By.xpath("(//span[@data-auto='snippet-price-current']/descendant::span[not(descendant::span) and not(contains(text(), '₽'))])[" + (i + 1) + "]")).getText();
-            //String strprice1 = getPrice(i + 1).getText();
+            //String name = waitForElementToBeRefreshedAndClickable(chromeDriver, By.xpath("(//h3[@data-auto='snippet-title'])[" + (i + 1) + "]")).getText();
+            String name = getName(i+1).getText();
+            //String strprice1 = waitForElementToBeRefreshedAndClickable(chromeDriver, By.xpath("(//span[@data-auto='snippet-price-current']/descendant::span[not(descendant::span) and not(contains(text(), '₽'))])[" + (i + 1) + "]")).getText();
+            String strprice = getPrice(i + 1).getText();
             int price = Integer.parseInt(strprice.replaceAll("[^0-9]", ""));
             allThePagesCatalog.get(currentPage).add(new PageItem(name, price));
         }

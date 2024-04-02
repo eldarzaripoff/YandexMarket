@@ -1,5 +1,6 @@
 package steps;
 
+import helper.Screenshooter;
 import io.qameta.allure.Step;
 import org.junit.jupiter.api.Assertions;
 import org.openqa.selenium.JavascriptExecutor;
@@ -8,6 +9,7 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import pages.NotebookListPage;
 import pages.YandexStartPage;
+import robust.RobustWebDriver;
 
 public class StepsAll {
     private static ChromeDriver driver;
@@ -54,9 +56,10 @@ public class StepsAll {
     }
 
     @Step("Проверка содержимого всех страниц на соответствие производителю {manufacturer}")
-    public static void checkingName(String lenovo, String lenovoCaps, String hpAllCaps, String hpCapsOnlyH, String thinkpad, String thinkPad) {
+    public static void checkingName(String lenovo, String lenovoCaps, String hpAllCaps, String hpCapsOnlyH, String thinkpad, String thinkPad, String smallLenovo, String lenRusOvRusO, String lenRusOvo, String lenovRusO, String rusHP, String rusHp, String HRUSP, String smallHP) {
         NotebookListPage notebookListPage = NotebookListPage.getInstance(driver);
-        notebookListPage.checkingNameOfAllThePages(lenovo, lenovoCaps, hpAllCaps, hpCapsOnlyH, thinkpad, thinkPad);
+        Screenshooter.getScreen(notebookListPage.getChromeDriver());
+        notebookListPage.checkingNameOfAllThePages(lenovo, lenovoCaps, hpAllCaps, hpCapsOnlyH, thinkpad, thinkPad, smallLenovo, lenRusOvRusO, lenRusOvo, lenovRusO, rusHP, rusHp, HRUSP, smallHP);
     }
 
     @Step("Возвращение на первую страницу")

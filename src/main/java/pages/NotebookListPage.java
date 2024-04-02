@@ -9,6 +9,8 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import robust.RobustWebDriver;
+import robust.RobustWebElement;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -19,13 +21,13 @@ import java.util.stream.Collectors;
 
 public class NotebookListPage {
     private static NotebookListPage instance;
-    private ChromeDriver chromeDriver;
-    private WebDriverWait wait;
-    private Actions actions;
-    //public Dictionary<String, List<PageItem>> allThePageCatalog = new Hashtable<>();
+    private final ChromeDriver chromeDriver;
+    private final WebDriverWait wait;
+    private final Actions actions;
     public LinkedHashMap<Integer, List<PageItem>> allThePagesCatalog = new LinkedHashMap<>();
     public List<PageItem> onePageCatalog = new ArrayList<>();
     public int currentPage = 0;
+    private final RobustWebDriver robustWebDriver;
 
 
     private NotebookListPage(ChromeDriver chromeDriver) {
@@ -34,6 +36,7 @@ public class NotebookListPage {
         wait.pollingEvery(Duration.ofSeconds(4));
         wait.ignoring(NoSuchElementException.class);
         this.actions = new Actions(chromeDriver);
+        robustWebDriver = new RobustWebDriver(chromeDriver);
     }
 
     public static synchronized NotebookListPage getInstance(ChromeDriver chromeDriver) {
@@ -104,35 +107,23 @@ public class NotebookListPage {
         getHPButton().click();
     }
 
-    public WebElement waitForElementToBeRefreshedAndClickable(ChromeDriver driver, By by) {
-        return new WebDriverWait(driver, 30)
-                .until(ExpectedConditions.refreshed(
-                        ExpectedConditions.presenceOfElementLocated(by)));
-    }
-
     public void parsingAllThePages() {
         currentPage = currentPage + 1;
-        String url = chromeDriver.getCurrentUrl();
         allThePagesCatalog.put(currentPage, new ArrayList<>());
         actions.moveToElement(getRecommendation()).perform();
         for (int i = 1; i < getItems().size(); i++) {
-            String name = getName(i).getText();
-            String strprice = getPrice(i).getText();
+            RobustWebElement robustWebElementName = new RobustWebElement(getName(i), robustWebDriver, By.xpath("(//h3[@data-auto='snippet-title'])[" + i + "]"));
+            String name = robustWebElementName.getText();
+            RobustWebElement robustWebElementPrice = new RobustWebElement(getPrice(i), robustWebDriver, By.xpath("(//span[@data-auto='snippet-price-current']/descendant::span[not(descendant::span) and not(contains(text(), '₽'))])[" + i + "]"));
+            String strprice = robustWebElementPrice.getText();
             int price = Integer.parseInt(strprice.replaceAll("[^0-9]", ""));
             allThePagesCatalog.get(currentPage).add(new PageItem(name, price));
         }
         if (!getForward().isEmpty()) {
             actions.moveToElement(getForward().get(0)).click().perform();
-//            waitForElementToBeRefreshedAndClickable(chromeDriver, By.xpath("//span[contains(text(), 'Вперёд')]")).click();
-//            waitForURLToChange(chromeDriver, url);
             parsingAllThePages();
         }
     }
-
-        public void waitForURLToChange(ChromeDriver driver, String oldURL) {
-            WebDriverWait wait = new WebDriverWait(driver, 10);
-            wait.until((ExpectedConditions.not(ExpectedConditions.urlToBe(oldURL))));
-        }
 
 
     public void checkingPriceOfAllThePages() {
@@ -145,13 +136,25 @@ public class NotebookListPage {
         Assertions.assertTrue(failedItems.isEmpty(), message);
     }
 
-    public void checkingNameOfAllThePages(String lenovo, String lenovoCaps, String hpAllCaps, String hpCapsOnlyH, String thinkpad, String thinkPad) {
+    public ChromeDriver getChromeDriver() {
+        return chromeDriver;
+    }
+
+    public void checkingNameOfAllThePages(String lenovo, String lenovoCaps, String hpAllCaps, String hpCapsOnlyH, String thinkpad, String thinkPad, String smallLenovo, String lenRusOvRusO, String lenRusOvo, String lenovRusO, String rusHP, String rusHp, String HRUSP, String smallHP ) {
         List<PageItem> failedItems = allThePagesCatalog.entrySet().stream().
                 flatMap(entry -> entry.getValue().stream()).filter(pageItem -> !pageItem.getName().contains(lenovo) &&
                         !pageItem.getName().contains(lenovoCaps) &&
                         !pageItem.getName().contains(hpAllCaps) &&
                         !pageItem.getName().contains(hpCapsOnlyH) &&
                         !pageItem.getName().contains(thinkpad) &&
+                        !pageItem.getName().contains(smallLenovo) &&
+                        !pageItem.getName().contains(lenRusOvRusO) &&
+                        !pageItem.getName().contains(lenovRusO) &&
+                        !pageItem.getName().contains(lenRusOvo) &&
+                        !pageItem.getName().contains(smallHP) &&
+                        !pageItem.getName().contains(HRUSP) &&
+                        !pageItem.getName().contains(rusHP) &&
+                        !pageItem.getName().contains(rusHp) &&
                         !pageItem.getName().contains(thinkPad))
                 .collect(Collectors.toList());
         StringJoiner joiner = new StringJoiner(System.lineSeparator());
@@ -162,9 +165,11 @@ public class NotebookListPage {
 
     public void parsingOnePage() {
         actions.moveToElement(getRecommendation()).perform();
-        for (int i = 0; i < getItems().size(); ++i) {
-            String name = getName(i + 1).getText();
-            String strprice = getPrice(i + 1).getText();
+        for (int i = 1; i < getItems().size(); i++) {
+            RobustWebElement robustWebElementName = new RobustWebElement(getName(i), robustWebDriver, By.xpath("(//h3[@data-auto='snippet-title'])[" + i + "]"));
+            String name = robustWebElementName.getText();
+            RobustWebElement robustWebElementPrice = new RobustWebElement(getPrice(i), robustWebDriver, By.xpath("(//span[@data-auto='snippet-price-current']/descendant::span[not(descendant::span) and not(contains(text(), '₽'))])[" + i + "]"));
+            String strprice = robustWebElementPrice.getText();
             int price = Integer.parseInt(strprice.replaceAll("[^0-9]", ""));
             onePageCatalog.add(new PageItem(name, price));
         }
@@ -190,7 +195,8 @@ public class NotebookListPage {
     public void rollThePagesBack() {
         actions.moveToElement(getRecommendation()).perform();
         String currentUrl = chromeDriver.getCurrentUrl();
-        getBackButton().click();
+        RobustWebElement robustWebElementGetBackButton = new RobustWebElement(getBackButton(), robustWebDriver, By.xpath("//span[contains(text(), 'Назад')]"));
+        wait.until(ExpectedConditions.elementToBeClickable(robustWebElementGetBackButton)).click();
         wait.until(ExpectedConditions.not(ExpectedConditions.urlToBe(currentUrl)));
         if (!getBack().isEmpty()) {
             rollThePagesBack();
@@ -205,7 +211,6 @@ public class NotebookListPage {
         return chromeDriver.findElement(By.xpath("//input[@id='header-search']"));
     }
 
-    //div[@data-zone-name='search_block']
     public void getTheResultsOfSearch(String notebookName) {
         actions.moveToElement(getSearhField());
         getSearhField().click();

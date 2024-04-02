@@ -12,22 +12,24 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 public class YandexStartPage {
     protected ChromeDriver chromeDriver;
     WebElement catalogButton;
-    @FindBy(how = How.XPATH, using = "//span[@class='_3krX4'][contains(text(),'Ноутбуки и компьютеры')]")
-    WebElement notebooksAndComputersButton;
-    @FindBy(how = How.XPATH, using = "//a[@class='egKyN _1mqvV _1wg9X'][contains(text(),'Ноутбуки')]")
+    @FindBy(how = How.XPATH, using = "//a[contains(text(),'Ноутбуки') and not(contains(text(), 'книги'))]")
     WebElement notebooksButton;
 
     public YandexStartPage(ChromeDriver chromeDriver) {
         this.chromeDriver = chromeDriver;
-        this.catalogButton = chromeDriver.findElement(By.xpath("//button[@class='V9Xu6 button-focus-ring _1KI8u Lfy7z _3iB1w _35Vhw']"));
+        this.catalogButton = chromeDriver.findElement(By.xpath("//span[contains(text(), 'Каталог')]"));
     }
 
     public void find() {
         catalogButton.click();
-        WebDriverWait wait = new WebDriverWait(chromeDriver, 180);
-        notebooksAndComputersButton = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//span[@class='_3krX4'][contains(text(),'Ноутбуки и компьютеры')]")));
-        new Actions(chromeDriver).moveToElement(notebooksAndComputersButton).perform();
-        notebooksButton = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//a[@class='egKyN _1mqvV _1wg9X'][contains(text(),'Ноутбуки')]")));
+        WebDriverWait wait = new WebDriverWait(chromeDriver, 15);
+        wait.until(ExpectedConditions.visibilityOf(getElektronikaButton()));
+        new Actions(chromeDriver).moveToElement(getElektronikaButton()).perform();
+        notebooksButton = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//a[contains(text(),'Ноутбуки') and not(contains(text(), 'книги'))]")));
         notebooksButton.click();
+    }
+
+    public WebElement getElektronikaButton() {
+        return chromeDriver.findElement(By.xpath("//div[@data-zone-name='catalog-content']//span[contains(text(), 'Электроника')]"));
     }
 }

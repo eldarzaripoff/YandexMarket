@@ -69,7 +69,7 @@ public class NotebookListPage {
 
     private WebElement getName(int i) {
         WebElement webElement = null;
-        for (int j = 0; j < 3; j++) {
+        for (int j = 0; j < 2; j++) {
             webElement = chromeDriver.findElement(By.xpath("(//h3[@data-auto='snippet-title'])[" + i + "]"));
         }
         return webElement;
@@ -113,25 +113,18 @@ public class NotebookListPage {
     public void parsingAllThePages() {
         currentPage = currentPage + 1;
         String url = chromeDriver.getCurrentUrl();
-        //allThePageCatalog.put(Integer.toString(currentPage), new ArrayList<>());
         allThePagesCatalog.put(currentPage, new ArrayList<>());
         actions.moveToElement(getRecommendation()).perform();
-        for (int i = 0; i < getItems().size(); ++i) {
-
-            //String name = waitForElementToBeRefreshedAndClickable(chromeDriver, By.xpath("(//h3[@data-auto='snippet-title'])[" + (i + 1) + "]")).getText();
-            String name = getName(i+1).getText();
-            //String strprice1 = waitForElementToBeRefreshedAndClickable(chromeDriver, By.xpath("(//span[@data-auto='snippet-price-current']/descendant::span[not(descendant::span) and not(contains(text(), '₽'))])[" + (i + 1) + "]")).getText();
-            String strprice = getPrice(i + 1).getText();
+        for (int i = 1; i < getItems().size(); i++) {
+            String name = getName(i).getText();
+            String strprice = getPrice(i).getText();
             int price = Integer.parseInt(strprice.replaceAll("[^0-9]", ""));
             allThePagesCatalog.get(currentPage).add(new PageItem(name, price));
         }
         if (!getForward().isEmpty()) {
-            waitForElementToBeRefreshedAndClickable(chromeDriver, By.xpath("//span[contains(text(), 'Вперёд')]")).click();
-            waitForURLToChange(chromeDriver, url);
-            url = chromeDriver.getCurrentUrl();
-            //wait.until(ExpectedConditions.elementToBeClickable(getForward().get(0))).click();
-            //getForward().get(0).click();
-            //wait.until(d -> Integer.parseInt(getCurrentPage(currentPage).getText()) != currentPage);
+            actions.moveToElement(getForward().get(0)).click().perform();
+//            waitForElementToBeRefreshedAndClickable(chromeDriver, By.xpath("//span[contains(text(), 'Вперёд')]")).click();
+//            waitForURLToChange(chromeDriver, url);
             parsingAllThePages();
         }
     }
